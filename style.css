@@ -27,3 +27,6 @@ body{
     background-color: grey; 
     height: 1000px;
 }
+#disneyPlusIntro{
+    border-width: 0;
+}
