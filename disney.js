@@ -6,47 +6,26 @@ var displayUrls = {};
 var imageIdCount = 1;
 var focusImageRow;
 var focusImageId;
+var fullCategoryTitles = [];
+
+//fetch call to grab json data and use it to parse and display data needed for home page view
 fetch('https://cd-static.bamgrid.com/dp-117731241344/home.json', {credentials: 'same-origin'})
         .then(function (response) {
             return response.json();
         })
         .then(function (responseObj) {
-            // const flattenObj = (data) => {
-            // // The object which contains the final result
-            // let result = {};
-
-            // // loop through the object "data"
-            // for (const i in data) {
-
-            //     // We check the type of the i using typeof() function and recursively call the function again
-            //     //check if data is an object and not an array; do not want to touch arrays
-            //     if ((typeof data[i]) === 'object' && !Array.isArray(data[i])) {
-            //         const temp = flattenObj(data[i]);
-            //         for (const j in temp) {
-            //             // Store temp in result
-            //             result[i + '.' + j] = temp[j];
-            //         }
-            //     }
-            //     // Else store data[i] in result directly
-            //     else {
-            //         result[i] = data[i];
-            //     }
-            // }
-            // return result;
-            // };
-            //collectionGroupId = responseObj.data.StandardCollection.collectionGroup.collectionGroupId;
-
             //get container obj 
             var container = responseObj.data.StandardCollection.containers;
 
-            //Build Container Titles
+            //Displays container titles i.e New to Disney+, Collections, Trending, etc
             var titleNumber = 1;
             for(var i=0; i<container.length; i++){
                 document.getElementById("title" + titleNumber).innerHTML = container[i].set.text.title.full.set.default.content;
+                fullCategoryTitles.push([container[i].set.text.title.full.set.default.content]);
                 titleNumber = titleNumber + 1;
             }
 
-            //create an object that contains the images we need to display and display them
+            //create containerSet obj that contains the image array we need to get and display
             var imagesDivCounter = 1
             for(var i=0; i<4; i++){
               containerSet = container[i].set.items;
@@ -54,7 +33,7 @@ fetch('https://cd-static.bamgrid.com/dp-117731241344/home.json', {credentials: '
               imagesDivCounter = imagesDivCounter + 1;
             }
 
-            //"focus" on the first image of the first row at the start of the page load
+            //focus on the first image of the first row at the start of the page load
             let focusImage = document.getElementById("images1").firstChild;
             document.getElementById(focusImage.id).style.border = "5px solid white";
             focusImageRow = "images1";
@@ -80,6 +59,7 @@ fetch('https://cd-static.bamgrid.com/dp-117731241344/home.json', {credentials: '
             });
 
             //display and get the rest of the category images not given by the home API
+            //sends in title and refId to pull data and check its contents
             categoryTitles = [];
             for(var i=4; i<container.length; i++){
               categoryTitles.push({
@@ -93,22 +73,23 @@ fetch('https://cd-static.bamgrid.com/dp-117731241344/home.json', {credentials: '
             console.log('error: ' + err);
         });
 
-//display's each url as an image to the screen 
+//gets and display's each url as an image to the screen 
+//adds every image url to an array to populate each image
+//uses three helper functions to get the correct url path in json file
+//loops through the array to display the images as a row by appending the image elements 
+//sets div to nowrap so images are displayed the same way as Disney/Hulu application
 function displayUrlImage(containerSet, imagesDivCounter){
     var imageUrls = [];
 
     for(let i=0; i<containerSet.length; i++){
       var containerItem = containerSet[i];
 
-      //checks if container item obj is a collection
       if(isCollection(containerItem)) {
         imageUrls.push(containerItem.image.tile[1.78].default.default.url);
       } 
-      //checks if container item obj is a series
       else if (isSeries(containerItem)) {
         imageUrls.push(containerItem.image.tile[1.78].series.default.url);
       } 
-      //checks if container item obj is a program
       else if (isProgram(containerItem)) {
         imageUrls.push(containerItem.image.tile[1.78].program.default.url);
       }
@@ -122,27 +103,30 @@ function displayUrlImage(containerSet, imagesDivCounter){
         showImage.id = imgId;
         document.getElementById(images).appendChild(showImage);
         imageIdCount++;
+        document.getElementById(images).style.whiteSpace = "nowrap";
     }
-    document.getElementById(images).style.whiteSpace = "nowrap";
 }
 
+//three functions checks to see if containerSet obj is a collection, series, or program
 function isCollection(containerSet) {
   return containerSet.collectionId;
 }
-
 function isSeries(containerSet) {
   return containerSet.seriesId;
 }
-
 function isProgram(containerSet) {
   return containerSet.programId;
 }
 
-//track which image to focus on with whatever key was clicked
+//track which image to focus on with whatever key was clicked using the image id associated with each image and the row it is in
+//for left and right: need to get and check first and last elements so that remote control works properly
+//up and down uses the rows dictated by HTML to set remote control focus movement
 function getNewFocusImage(currentImageRow, currentImageId, direction){
     if(direction == "right"){
         let imgId = "imgNum"+ (parseInt(currentImageId.substring(6)) + 1).toString();
-        if(document.getElementById(currentImageRow).contains(document.getElementById(currentImageId))){
+        lastImageInRow = document.getElementById(currentImageRow).lastChild.id;
+        if(document.getElementById(currentImageRow).contains(document.getElementById(currentImageId))
+                && (lastImageInRow > currentImageId)){
             setNewFocusImage(currentImageId, imgId);
         }
         //at the end of the row
@@ -150,7 +134,9 @@ function getNewFocusImage(currentImageRow, currentImageId, direction){
     }
     if(direction == "left"){
         let imgId = "imgNum" + (parseInt(currentImageId.substring(6)) - 1).toString();
-        if(document.getElementById(currentImageRow).contains(document.getElementById(currentImageId))){
+        firstImageInRow = document.getElementById(currentImageRow).firstChild.id;
+        if(document.getElementById(currentImageRow).contains(document.getElementById(currentImageId))
+                && (firstImageInRow < currentImageId)){
             setNewFocusImage(currentImageId, imgId);
         }
         //at the start of the row
@@ -169,7 +155,7 @@ function getNewFocusImage(currentImageRow, currentImageId, direction){
     if(direction == "down"){
         let imgRow = "images" + (parseInt(currentImageRow.substring(6)) + 1).toString();
         let imgId = "imgNum" + (parseInt(currentImageId.substring(6)) + 15).toString();
-        if(document.body.contains(document.getElementById(imgRow)) && imgRow.substring(6) <= 4){
+        if(document.body.contains(document.getElementById(imgRow))){
             focusImageRow = imgRow;
             setNewFocusImage(currentImageId, imgId);
         }
@@ -177,35 +163,35 @@ function getNewFocusImage(currentImageRow, currentImageId, direction){
         else{ console.log("At end of categories, ", focusImageRow); }
     }
 }
-//set the new focus image given the right parameters
+
+//set the new focus image given the right parameters and unsets previous focus
 function setNewFocusImage(currentImageId, imgId){
     document.getElementById(currentImageId).style.border = "";
     focusImageId = imgId;
     document.getElementById(focusImageId).style.border = "5px solid white";
 }
 
-//display the other images not already shown; dynamically pulled via json
-function displayOtherCategories(categories){
+//display the other images not already shown; dynamically pulled via json using the refId provided
+//need to use async await so that the image id's for dynamically populated images are ordered correctly for each row 
+//uses SetCorrectContainer to correct map the right path to retrieve images
+//uses getImageDivId to set the images to the correct row
+//uses displayUrlImage to display images
+async function displayOtherCategories(categories){
     for(i=0; i<categories.length;i++) {
       var refId = categories[i].refId;
-      fetch("https://cd-static.bamgrid.com/dp-117731241344/sets/" + refId + ".json", {credentials: 'same-origin'})
+      let dynamicFetch = await fetch("https://cd-static.bamgrid.com/dp-117731241344/sets/" + refId + ".json", {credentials: 'same-origin'})
         .then(function (response) {
             return response.json();
         })
         .then(function (responseDataDynamic) {
-          var imagesDivCounter = 5;
-            for(var i=0; i<4; i++){
-              //containerSet = container[i].set.items;
-              console.log(responseDataDynamic.data);
-              containerSet = setCorrectContainer(responseDataDynamic.data);
-              //console.log(containerSet)
-              displayUrlImage(containerSet, imagesDivCounter);
-              imagesDivCounter = imagesDivCounter + 1;
-            }
+            containerSet = setCorrectContainer(responseDataDynamic.data);
+            var imagesDivCounterForDynamicRefs = getImageDivId(responseDataDynamic.data);
+            displayUrlImage(containerSet, imagesDivCounterForDynamicRefs);
         })
     }
 }
 
+//checks which set response is and returns the path to obtain images
 function setCorrectContainer(response){
     if(response.TrendingSet){
         return response.TrendingSet.items;
@@ -215,5 +201,30 @@ function setCorrectContainer(response){
     }
     else if(response.PersonalizedCuratedSet){
         return response.PersonalizedCuratedSet.items;
+    }
+}
+
+//checks the content title associated with the object
+//returns the correct row count for image display
+function getImageDivId(container){
+    for(var i=0; i<fullCategoryTitles.length; i++){
+        if(container.TrendingSet){
+            if(container.TrendingSet.text.title.full.set.default.content == fullCategoryTitles[i])
+            {
+                return i+1;
+            }
+        }
+        else if(container.CuratedSet){
+            if(container.CuratedSet.text.title.full.set.default.content == fullCategoryTitles[i])
+            {
+                return i+1;
+            }
+        }
+        else if(container.PersonalizedCuratedSet){
+            if(container.PersonalizedCuratedSet.text.title.full.set.default.content == fullCategoryTitles[i])
+            {
+                return i+1;
+            }
+        }
     }
 }
