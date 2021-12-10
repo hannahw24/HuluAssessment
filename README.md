@@ -6,9 +6,9 @@ To run the application, download the zip file and open up disney.html (make sure
 Use up/down/left/right arrow keys to move focus
 
 Additional Features:
--Dynamically populated images using refId
--Disney+ logo
--Disney+ Startup sound
+1) Dynamically populated images using refId
+2) Disney+ logo
+3) Disney+ Startup sound
 
 Noticable Issues:
 1) New to Disney+ has two populated image sets
