@@ -4,7 +4,7 @@ GitHub for Hulu Assessment, December 2021
 How to Use:
 Two ways to run the application <br>
 1) Download the zip file and open up index.html (make sure to have volume on and a decent level)
-2) Go to https://hannahw24.github.io/HuluAssessment/ (make sure to have volume on and a decent level)
+2) Go to https://hannahw24.github.io/HuluAssessment/ (make sure to have volume on and a decent level) <br>
 Use up/down/left/right arrow keys to move focus
 
 Additional Features:
