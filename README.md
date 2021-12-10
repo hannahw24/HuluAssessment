@@ -2,7 +2,7 @@
 GitHub for Hulu Assessment, December 2021
 
 How to Use:
-To run the application, download the zip file and open up disney.html (make sure to have volume on and a decent level) <br>
+To run the application, download the zip file and open up index.html (make sure to have volume on and a decent level) <br>
 Use up/down/left/right arrow keys to move focus
 
 Additional Features:
