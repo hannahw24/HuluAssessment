@@ -10,7 +10,7 @@ Use up/down/left/right arrow keys to move focus
 Additional Features:
 1) Dynamically populated images using refId
 2) Disney+ logo
-3) Disney+ Startup sound
+3) Disney+ Startup sound (should play upon loading/reloading the page)
 
 Noticable Issues:
 1) New to Disney+ has two populated image sets <br>
